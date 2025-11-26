@@ -1,0 +1,22 @@
+{
+  "txt": ["📄", "Testo"],
+  "md": ["📄", "Markdown"],
+  "log": ["📄", "Log"],
+  "pdf": ["📕", "PDF"],
+  "docx": ["📘", "Word"],
+  "xlsx": ["📗", "Excel"],
+  "pptx": ["📙", "PowerPoint"],
+  "jpg": ["🖼️", "Immagine"],
+  "jpeg": ["🖼️", "Immagine"],
+  "png": ["🖼️", "Immagine"],
+  "gif": ["🖼️", "Animazione"],
+  "mp3": ["🎵", "Audio"],
+  "mp4": ["🎞️", "Video"],
+  "zip": ["🗜️", "Archivio"],
+  "py": ["💻", "Python"],
+  "sh": ["💻", "Shell"],
+  "js": ["💻", "JavaScript"],
+  "json": ["💻", "JSON"],
+  "html": ["🌐", "HTML"],
+  "": ["📦", "Sconosciuto"]
+}

@@ -1,0 +1,35 @@
+services:
+  logviewer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Usa la rete host DURANTE IL BUILD (equivalente a docker build --network=host)
+      network: host
+      # Applica gli host override DURANTE IL BUILD (equivalente a --add-host)
+      extra_hosts:
+        - "pypi.org:151.101.0.223"
+        - "pypi.python.org:151.101.0.223"
+        - "files.pythonhosted.org:151.101.0.223"
+    container_name: logviewer
+    # Rete a runtime: puoi usare bridge con mappatura porte
+    network_mode: bridge
+    ports:
+      - "5000:5000"
+    # Volumi per persistenza/modifica live
+    volumes:
+      - ./logs_html:/app/logs_html
+      - ./templates:/app/templates
+      - ./scripts:/app/scripts
+      - ./static:/app/static
+      - ./link_pool:/app/link_pool
+#      - /home/roberto/Downloads:/home/roberto/Downloads:ro
+    # DNS espliciti a runtime (fallback se il bridge non risolve)
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    environment:
+      PIP_NO_CACHE_DIR: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+    restart: unless-stopped

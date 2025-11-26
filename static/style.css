@@ -1,0 +1,64 @@
+:root {
+  --bg: #f4f6f8;
+  --fg: #222;
+  --code-bg: #272822;
+  --code-fg: #f8f8f2;
+}
+
+body.dark {
+  --bg: #1e1e1e;
+  --fg: #ddd;
+  --code-bg: #2d2d2d;
+  --code-fg: #e0e0e0;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 2em;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  background-color: var(--bg);
+  color: var(--fg);
+  padding: 2em;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+  color: var(--fg);
+}
+
+pre {
+  background: var(--code-bg);
+  color: var(--code-fg);
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: monospace;
+  font-size: 0.95em;
+}
+
+.meta {
+  font-size: 0.9em;
+  color: #888;
+}
+
+.toolbar {
+  margin-bottom: 1em;
+}
+
+button {
+  margin-right: 1em;
+  padding: 0.4em 0.8em;
+  border: none;
+  border-radius: 4px;
+  background: #0078d4;
+  color: white;
+  cursor: pointer;
+}

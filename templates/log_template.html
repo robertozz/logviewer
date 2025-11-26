@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="toolbar">
+      <button onclick="toggleTheme()" id="themeToggle">🌙 Tema: Scuro</button>
+      <button onclick="copyOutput()">📋 Copia output</button>
+      <a href="{{ filename }}" download><button>⬇️ Scarica</button></a>
+    </div>
+
+    <h1>📄 Log: {{ base_name }}</h1>
+    <div class="meta">Generato il {{ timestamp }} da <code>log_to_html.py</code></div>
+
+    <h2>🧭 Comando eseguito</h2>
+    <pre>{{ cmd }}</pre>
+
+    <h2>📤 Output</h2>
+    <pre id="output">{{ output }}</pre>
+  </div>
+
+  <script src="theme.js"></script>
+
+</body>
+</html>
