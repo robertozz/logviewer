@@ -1,36 +1,27 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <title>Log Viewer</title>
-  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="utf-8">
+  <title>Logviewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Stile locale -->
+  <link rel="stylesheet" href="/static/style.css">
+  <!-- (Opzionale) Bootstrap se vuoi la UI pronta -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    .mono { font-family: monospace; }
-    .small-muted { font-size: 0.85rem; color: #6c757d; }
-    .item-meta { margin-left: 0.5rem; color: #6c757d; font-size: 0.9rem; }
-    .icon { font-size: 1.1rem; margin-right: 0.35rem; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    .icon { margin-right: .5rem; }
+    .item-meta { margin-left: .5rem; color: #666; }
+    .list-group-item.command-row { background: #f8f9fa; }
   </style>
 </head>
-<body>
+<body class="bg-light">
   <div class="container py-4">
-    <div class="toolbar mb-3 d-flex justify-content-between align-items-center">
-      <div>
-        <button onclick="toggleTheme()" id="themeToggle">🌙 Tema: Scuro</button>
-        <button onclick="location.reload()">🔄 Aggiorna lista</button>
-      </div>
-      <div class="d-flex align-items-center">
-        <input type="text" id="searchInput" class="form-control form-control-sm me-2"
-               placeholder="🔍 Cerca..." onkeyup="filterItems()">
-        <a href="/logs.zip" class="btn btn-sm btn-outline-primary">⬇️ Scarica tutti i log</a>
-      </div>
-    </div>
+    <h1 class="mb-4">Logviewer</h1>
 
-    <h1 class="mb-4">📄 Log Viewer</h1>
-
-    <h3>Log disponibili</h3>
-    <ul class="list-group mb-4" id="logList">
+    <!-- Sezione: Log HTML -->
+    <h2 class="h4">Log</h2>
+    <ul class="list-group mb-4">
       {% for item in logs %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
           <div>
@@ -46,11 +37,17 @@
           </div>
           <a href="/log/{{ item.name }}" download class="btn btn-sm btn-outline-primary">⬇️ Scarica</a>
         </li>
+        {% if item.command %}
+        <li class="list-group-item command-row">
+          <small class="text-muted">Comando: <code class="mono">{{ item.command }}</code></small>
+        </li>
+        {% endif %}
       {% endfor %}
     </ul>
 
-    <h3>Script disponibili</h3>
-    <ul class="list-group mb-4" id="scriptList">
+    <!-- Sezione: Script -->
+    <h2 class="h4">Script</h2>
+    <ul class="list-group mb-4">
       {% for item in scripts %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
           <div>
@@ -64,13 +61,14 @@
               {% endif %}
             {% endif %}
           </div>
-          <a href="/script/{{ item.name }}" download class="btn btn-sm btn-outline-secondary">⬇️ Scarica</a>
+          <a href="/script/{{ item.name }}" download class="btn btn-sm btn-outline-primary">⬇️ Scarica</a>
         </li>
       {% endfor %}
     </ul>
 
-    <h3>Link generici</h3>
-    <ul class="list-group mb-4" id="linkPool">
+    <!-- Sezione: Link (symlink o file in link_pool) -->
+    <h2 class="h4">Link</h2>
+    <ul class="list-group mb-4">
       {% for item in links %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
           <div>
@@ -84,26 +82,13 @@
               {% endif %}
             {% endif %}
           </div>
-          <a href="/link/{{ item.name }}" download class="btn btn-sm btn-outline-secondary">⬇️ Scarica</a>
+          <a href="/link/{{ item.name }}" download class="btn btn-sm btn-outline-primary">⬇️ Scarica</a>
         </li>
       {% endfor %}
     </ul>
-  </div>
 
-  <script src="{{ url_for('static', filename='theme.js') }}"></script>
-  <script>
-    function filterItems() {
-      const q = document.getElementById("searchInput").value.toLowerCase();
-      const groups = ["#logList","#scriptList","#linkPool"];
-      groups.forEach(sel => {
-        document.querySelectorAll(sel + " li").forEach(li => {
-          li.style.display = li.textContent.toLowerCase().includes(q) ? "" : "none";
-        });
-      });
-    }
-    function toggleTheme() {
-      document.body.classList.toggle("dark-theme");
-    }
-  </script>
+    <!-- Download tutti i log -->
+    <a class="btn btn-secondary" href="/logs.zip">Scarica tutti i log (zip)</a>
+  </div>
 </body>
 </html>

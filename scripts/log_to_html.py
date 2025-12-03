@@ -85,9 +85,9 @@ for asset in ("style.css", "theme.js"):
         print(f"⚠️ Impossibile copiare asset {asset}: {e}")
 
 # === APERTURA AUTOMATICA (silenziosa in caso di errore) ===
-try:
-    subprocess.run(["xdg-open", filepath], check=False)
-except Exception:
-    pass
+# try:
+#     subprocess.run(["xdg-open", filepath], check=False)
+# except Exception:
+#     pass
 
 print(f"✅ Log HTML salvato in: {filepath}")

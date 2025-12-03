@@ -30,6 +30,9 @@ docker run --rm -p 5000:5000 logviewer
 │   └── *.html
 ├── README.md
 
+USO
+python scripts/log_to_html.py "cat .gitignore"
+
 Log Viewer
 Un semplice viewer web per file locali e symlink, progettato per essere eseguito in Docker. Mostra tre aree principali: log HTML (logs_html), script (scripts) e link generici (link_pool) — file o symlink con icona e descrizione basata sull’estensione.
 

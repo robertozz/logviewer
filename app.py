@@ -1,7 +1,36 @@
+"""
+Log Viewer - avvio e riavvio
+
+Esempi di riavvio:
+
+# 1) Avvio diretto (sviluppo)
+python3 app.py
+
+# 2) Riavvio semplice (se lanciato in foreground)
+# interrompi con CTRL+C e rilancia:
+python3 app.py
+
+# 3) Riavvio con systemd (esempio di unit file)
+# sudo systemctl restart logviewer.service
+
+# 4) Avvio/riavvio con Docker Compose (consigliato in produzione)
+# dalla cartella del progetto:
+# sudo docker compose up -d --build
+# sudo docker compose down
+
+# 5) Riavvio rapido (one-liner)
+# pkill -f "app.py" || true && nohup python3 app.py &
+
+Sostituisci i comandi con quelli adatti al tuo ambiente.
+"""
+
+
 from flask import Flask, render_template, send_from_directory, send_file, abort
 import os
 import json
 import shutil
+import re
+from html import unescape
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
@@ -32,10 +61,14 @@ def load_ext_map(path=EXT_MAP_PATH):
             "html": ("🌐", "HTML"),
             "txt": ("📄", "Testo"),
             "jpg": ("🖼️", "Immagine"),
+            "jpeg": ("🖼️", "Immagine"),
             "png": ("🖼️", "Immagine"),
             "py": ("💻", "Python"),
             "sh": ("💻", "Shell"),
-            "pdf": ("📕", "PDF")
+            "pdf": ("📕", "PDF"),
+            "log": ("📄", "Log"),
+            "md": ("📄", "Markdown"),
+            "zip": ("🗜️", "Archivio")
         }
 
 EXT_MAP = load_ext_map()
@@ -50,10 +83,62 @@ def target_allowed(resolved_path):
             return True
     return False
 
+def _strip_tags(text):
+    # rimuove tag HTML semplicemente
+    return re.sub(r'<[^>]+>', '', text)
+
+def extract_command_from_log(path):
+    """
+    Estrae il comando dal log HTML con più euristiche:
+    1) commento HTML: <!-- command: ... -->
+    2) meta tag: <meta name="command" content="...">
+    3) <pre> o <code> che contengono comandi
+    4) fallback: rimuove tag e cerca righe che iniziano con comandi tipici
+    """
+    try:
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            html = f.read()
+    except Exception:
+        return None
+
+    # 1) commento <!-- command: ... -->
+    m = re.search(r'<!--\s*command\s*:\s*(.+?)\s*-->', html, flags=re.IGNORECASE | re.DOTALL)
+    if m:
+        return unescape(m.group(1).strip())
+
+    # 2) meta tag <meta name="command" content="...">
+    m = re.search(r'<meta[^>]*name=["\']command["\'][^>]*content=["\']([^"\']+)["\']', html, flags=re.IGNORECASE)
+    if m:
+        return unescape(m.group(1).strip())
+
+    # 3) contenuto di <pre> o <code> (primo blocco che sembra un comando)
+    for tag in ("pre", "code"):
+        m = re.search(rf'<{tag}[^>]*>(.*?)</{tag}>', html, flags=re.IGNORECASE | re.DOTALL)
+        if m:
+            text = _strip_tags(m.group(1)).strip()
+            # prendi la prima riga che sembra un comando
+            for line in text.splitlines():
+                line = line.strip()
+                if re.match(r'^(cat |python |bash |sh |\.\/|/usr/|sudo )', line):
+                    return unescape(line)
+
+    # 4) fallback: rimuovi tag e cerca righe che iniziano con comandi tipici
+    plain = _strip_tags(html)
+    for line in plain.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if re.match(r'^(command:)\s*(.+)', line, flags=re.IGNORECASE):
+            return unescape(re.sub(r'^(command:)\s*', '', line, flags=re.IGNORECASE).strip())
+        if re.match(r'^(cat |python |bash |sh |\.\/|/usr/|sudo )', line):
+            return unescape(line)
+
+    return None
+
 def list_generic(path, exts=None):
     """
     Restituisce lista di dict con chiavi:
-    name, ext, is_symlink, target_raw, target_resolved, icon, type_label
+    name, ext, is_symlink, target_raw, target_resolved, icon, type_label, command
     """
     items = []
     try:
@@ -68,6 +153,7 @@ def list_generic(path, exts=None):
         is_link = os.path.islink(full)
         target_raw = None
         target_resolved = None
+        command = None
 
         if is_link:
             try:
@@ -83,6 +169,10 @@ def list_generic(path, exts=None):
         ext = ext.lower().lstrip(".")
         icon, type_label = ext_to_icon_and_label(ext)
 
+        # Se è un log HTML, prova a estrarre il comando
+        if ext == "html":
+            command = extract_command_from_log(full)
+
         items.append({
             "name": name,
             "ext": ext,
@@ -90,7 +180,8 @@ def list_generic(path, exts=None):
             "target_raw": target_raw,
             "target_resolved": target_resolved,
             "icon": icon,
-            "type_label": type_label
+            "type_label": type_label,
+            "command": command
         })
     return items
 
@@ -105,6 +196,10 @@ def index():
 def serve_log(filename):
     if ".." in filename or filename.startswith("/"):
         abort(400)
+    full = os.path.join(LOG_DIR, filename)
+    if not os.path.exists(full):
+        abort(404)
+    # Serve direttamente: il template mostra il comando estratto nella lista principale
     return send_from_directory(LOG_DIR, filename)
 
 @app.route("/script/<path:filename>")
@@ -149,4 +244,5 @@ def download_all():
     return send_from_directory("/tmp", "logs.zip", as_attachment=True)
 
 if __name__ == "__main__":
+    # Avvio server senza apertura automatica del browser
     app.run(host="0.0.0.0", port=5000, debug=True)
