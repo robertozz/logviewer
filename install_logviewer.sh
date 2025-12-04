@@ -26,7 +26,8 @@ echo -e " ${UGreen}Stop:${Color_Off} logviewer stop"
 echo -e " ${UGreen}Restart:${Color_Off} logviewer restart"
 echo -e " ${UGreen}Status:${Color_Off} logviewer status"
 echo -e " ${UGreen}genlog:${Color_Off} logviewer genlog <command>"
-echo ""
+echo -e " ${UGreen}How to expose file:${Color_Off} cp -l <file> ~/docker-stacks/logviewer/scripts/"
+echo -e " ${UBlue}°°°${Color_Off} Per visualizzare i file da remoto utilizzare un browser su http://$(hostname -I | awk '{print $1}'):5000 ${UBlue}°°°${Color_Off}"
 
 EOF
   echo "Descrizione aggiunta a $BASH_PROFILE"
